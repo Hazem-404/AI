@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Agent 1 - Greeting</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="card">
+    <h2>🔊 Agent 1: Name Greeter</h2>
+    <input id="nameInput" placeholder="Enter your name or use mic..." />
+    <button onclick="talkToAgent1()">Send</button>
+    <button class="mic-button" onclick="startVoiceRecognition()">🎤 Speak</button>
+    <div class="response" id="agent1Response"></div>
+    <div class="nav-link">
+      <a href="/">← Back to Home</a>
+    </div>
+  </div>
+
+<script>
+  async function talkToAgent1() {
+    const name = document.getElementById("nameInput").value;
+    if (!name) return;
+    const res = await fetch("/api/agent1", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name })
+    });
+    const data = await res.json();
+    const message = data.response || data.error;
+    document.getElementById("agent1Response").textContent = message;
+    speak(message);
+  }
+
+  function speak(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US"; // "ar-EG" لو بالعربي
+    speechSynthesis.speak(utterance);
+  }
+
+  function startVoiceRecognition() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US"; // "ar-EG" لو عايز عربي
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      document.getElementById("agent1Response").textContent = "🎙️ Listening...";
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      document.getElementById("nameInput").value = transcript;
+      talkToAgent1();
+    };
+
+    recognition.onerror = (event) => {
+      document.getElementById("agent1Response").textContent = "❌ Error: " + event.error;
+    };
+
+    recognition.start();
+  }
+</script>
+
+</body>
+</html>
