@@ -1,0 +1,77 @@
+body {
+  font-family: 'Rubik', sans-serif;
+  background: #f4f6f8;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.card {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  max-width: 400px;
+  width: 100%;
+}
+
+h2 {
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #2979ff;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 5px;
+}
+
+button:hover {
+  background: #1565c0;
+}
+
+.mic-button {
+  background-color: #222;
+  color: white;
+}
+
+.response {
+  margin-top: 20px;
+  font-size: 16px;
+  color: #222;
+  background: #f1f1f1;
+  padding: 12px;
+  border-radius: 8px;
+  word-wrap: break-word;
+}
+
+.nav-link {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.nav-link a {
+  text-decoration: none;
+  color: #0077ff;
+  font-weight: bold;
+}
