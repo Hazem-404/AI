@@ -1,0 +1,84 @@
+from flask import Flask, request, jsonify, render_template  # Import Flask and related modules for web app and API
+import datetime  # For handling date and time
+import pytz  # For timezone support
+import requests  # For making HTTP requests (to weather API)
+from iso3166 import countries  # For country code lookup
+
+app = Flask(__name__)  # Initialize Flask app
+
+# ----------------------------
+# Agent 1: Greet by Name (with simple language detection)
+# ----------------------------
+@app.route("/api/agent1", methods=["POST"])
+def agent1():
+    data = request.json or {}  # Get JSON data from request, fallback to empty dict
+    name = data.get("name", "").strip()  # Extract 'name' and remove whitespace
+
+    if not name:
+        # If name is missing, return error
+        return jsonify({"error": "Please provide a name."}), 400
+
+    # Detect Arabic letters in the name (Unicode range for Arabic)
+    if any('\u0600' <= ch <= '\u06FF' for ch in name):
+        greeting = f"\u0645\u0631\u062d\u0628\u064b\u0627 \u064a\u0627 {name}!"  # Arabic greeting
+    else:
+        greeting = f"Hey {name}!"  # English greeting
+
+    return jsonify({"response": greeting})  # Return greeting as JSON
+
+
+# ----------------------------
+# Agent 2: Weather & Time (No API key required)
+# ----------------------------
+@app.route("/api/agent2", methods=["POST"])
+def agent2():
+    data = request.json or {}  # Get JSON data from request, fallback to empty dict
+    country = data.get("country")  # Extract 'country' from request
+    if not country:
+        # If country is missing, return error
+        return jsonify({"error": "Missing country"}), 400
+
+    try:
+        # Get weather from wttr.in (Free, no API key)
+        weather_url = f"https://wttr.in/{country}?format=3"  # Format: short summary
+        weather_resp = requests.get(weather_url)  # Make HTTP GET request
+        if weather_resp.status_code != 200:
+            raise Exception("Weather API error")  # Raise error if request failed
+
+        weather_text = weather_resp.text.strip()  # Get weather text
+
+        # Get time using country name -> country code -> timezone
+        try:
+            country_code = countries.get(country).alpha2  # Convert country name to ISO alpha-2 code
+            tz = pytz.country_timezones[country_code][0]  # Get first timezone for country
+            now = datetime.datetime.now(pytz.timezone(tz))  # Get current time in that timezone
+            time_text = now.strftime("Current time: %H:%M - %d %B %Y")  # Format time string
+        except:
+            time_text = "Time not available."  # Fallback if timezone lookup fails
+
+        return jsonify({"response": f"{weather_text}. {time_text}"})  # Return weather and time
+
+    except Exception as e:
+        # Catch all errors (network, parsing, etc.)
+        return jsonify({"error": "Could not get data for that country."}), 500
+
+
+# ----------------------------
+# Routes to Pages
+# ----------------------------
+@app.route("/")
+def home():
+    return render_template("home.html")  # Render home page
+
+@app.route("/agent1")
+def agent1_page():
+    return render_template("agent1.html")  # Render Agent 1 page
+
+@app.route("/agent2")
+def agent2_page():
+    return render_template("agent2.html")  # Render Agent 2 page
+
+
+# ----------------------------
+if __name__ == "__main__":
+    app.run(debug=True)  # Run the Flask app in debug mode 
